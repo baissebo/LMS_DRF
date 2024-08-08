@@ -2,7 +2,13 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from phonenumber_field.modelfields import PhoneNumberField
 
+from materials.models import Course, Lesson
 from nullable import NULLABLE
+
+PAYMENT_TYPE_CHOICES = (
+    ("cash", "Наличные"),
+    ("bank_transfer", "Банковский перевод"),
+)
 
 
 class User(AbstractUser):
@@ -19,7 +25,7 @@ class User(AbstractUser):
         upload_to="users_avatars/",
         verbose_name="Аватар",
         **NULLABLE,
-        help_text="Загрузите изображение"
+        help_text="Загрузите изображение",
     )
     token = models.CharField(max_length=100, verbose_name="Token", **NULLABLE)
 
@@ -32,3 +38,29 @@ class User(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class Payment(models.Model):
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name="Пользователь"
+    )
+    payment_date = models.DateField(auto_now_add=True, verbose_name="Дата оплаты")
+    paid_course = models.ManyToManyField(
+        Course, blank=True, verbose_name="Оплаченный курс", related_name="payments"
+    )
+    paid_lesson = models.ManyToManyField(
+        Lesson, blank=True, verbose_name="Оплаченный урок", related_name="payments"
+    )
+    amount = models.DecimalField(
+        max_digits=10, decimal_places=2, verbose_name="Сумма оплаты"
+    )
+    payment_type = models.CharField(
+        max_length=50, verbose_name="Способ оплаты", choices=PAYMENT_TYPE_CHOICES
+    )
+
+    class Meta:
+        verbose_name = "Платеж"
+        verbose_name_plural = "Платежи"
+
+    def __str__(self):
+        return f"{self.user} - {self.amount}"
