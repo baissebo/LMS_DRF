@@ -29,24 +29,27 @@ class Command(BaseCommand):
             name="Знакомство с Django",
             description="Основы Django",
             video_link="https://example.com/lesson1",
+            course=self.course1
         )
         self.lesson2 = Lesson.objects.create(
             name="Сериализаторы",
             description="REST API",
             video_link="https://example.com/lesson2",
+            course=self.course2
         )
 
     def create_payments(self):
         self.payment1 = Payment.objects.create(
             user=self.user1,
-            paid_course=self.course1,
-            paid_lesson=self.lesson1,
             amount=20000.00,
             payment_type="bank_transfer",
         )
+        self.payment1.paid_course.set([self.course1])
+        self.payment1.paid_lesson.set([self.lesson1])
+
         self.payment2 = Payment.objects.create(
             user=self.user2,
-            paid_course=self.course2,
             amount=30000.00,
             payment_type="cash",
         )
+        self.payment2.paid_course.set([self.course2])

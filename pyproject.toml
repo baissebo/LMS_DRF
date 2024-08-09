@@ -16,6 +16,8 @@ black = "^24.8.0"
 pillow = "^10.4.0"
 phonenumbers = "^8.13.42"
 isort = "^5.13.2"
+shell = "^1.0.1"
+ipython = "^8.26.0"
 
 
 [build-system]
