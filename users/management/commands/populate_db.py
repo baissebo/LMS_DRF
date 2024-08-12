@@ -15,11 +15,11 @@ class Command(BaseCommand):
         self.stdout.write(self.style.SUCCESS("База данных успешно заполнена!"))
 
     def create_groups(self):
-        self.croup1 = Group.objects.get_or_create(name='moders')
+        self.croup1 = Group.objects.get_or_create(name="moders")
 
     def create_users(self):
         self.user1 = User.objects.create(email="user1@gmail.com", password="password1")
-        self.user1.groups.add(Group.objects.get(name='moders'))
+        self.user1.groups.add(Group.objects.get(name="moders"))
 
         self.user2 = User.objects.create(email="user2@gmail.com", password="password2")
 
@@ -36,13 +36,13 @@ class Command(BaseCommand):
             name="Знакомство с Django",
             description="Основы Django",
             video_link="https://example.com/lesson1",
-            course=self.course1
+            course=self.course1,
         )
         self.lesson2 = Lesson.objects.create(
             name="Сериализаторы",
             description="REST API",
             video_link="https://example.com/lesson2",
-            course=self.course2
+            course=self.course2,
         )
 
     def create_payments(self):
