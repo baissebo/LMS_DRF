@@ -19,6 +19,7 @@ isort = "^5.13.2"
 shell = "^1.0.1"
 ipython = "^8.26.0"
 django-filter = "^24.3"
+djangorestframework-simplejwt = "^5.3.1"
 
 
 [build-system]
