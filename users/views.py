@@ -7,14 +7,15 @@ from rest_framework.generics import (
     ListAPIView,
     DestroyAPIView,
 )
-from rest_framework.permissions import AllowAny
+from rest_framework.permissions import AllowAny, IsAuthenticated
 
 from users.models import User, Payment
-from users.serializers import UserSerializer, PaymentSerializer
+from users.permissions import IsOwner
+from users.serializers import UserSerializer, PaymentSerializer, UserProfileSerializer
 
 
 class UserCreateAPIView(CreateAPIView):
-    serializer_class = UserSerializer
+    serializer_class = UserProfileSerializer
     queryset = User.objects.all()
     permission_classes = (AllowAny,)
 
@@ -24,9 +25,33 @@ class UserCreateAPIView(CreateAPIView):
         user.save()
 
 
-class UserProfileUpdateAPIView(UpdateAPIView):
+class UserListAPIView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+
+class UserProfileRetrieveAPIView(RetrieveAPIView):
+    queryset = User.objects.all()
+
+    def get_serializer_class(self):
+        if self.request.user == self.get_object():
+            return UserProfileSerializer
+        return UserSerializer
+
+
+class UserProfileUpdateAPIView(UpdateAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = (IsAuthenticated, IsOwner)
+
+    def get_object(self):
+        return self.request.user
+
+
+class UserProfileDestroyAPIView(DestroyAPIView):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = (IsAuthenticated, IsOwner)
 
     def get_object(self):
         return self.request.user
