@@ -1,5 +1,5 @@
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters
+from rest_framework import filters, status
 from rest_framework.generics import (
     CreateAPIView,
     UpdateAPIView,
@@ -8,6 +8,7 @@ from rest_framework.generics import (
     DestroyAPIView,
 )
 from rest_framework.permissions import AllowAny, IsAuthenticated
+from rest_framework.response import Response
 
 from users.models import User, Payment
 from users.permissions import IsOwner
@@ -28,6 +29,18 @@ class UserCreateAPIView(CreateAPIView):
 class UserListAPIView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+
+    def list(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        user_data = []
+
+        for user in queryset:
+            if user == request.user:
+                user_data.append(UserProfileSerializer(user).data)
+            else:
+                user_data.append(UserSerializer(user).data)
+
+        return Response(user_data)
 
 
 class UserProfileRetrieveAPIView(RetrieveAPIView):
