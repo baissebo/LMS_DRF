@@ -2,8 +2,14 @@ from django.urls import path
 from rest_framework.permissions import AllowAny
 
 from users.apps import UsersConfig
-from users.views import UserProfileUpdateAPIView, PaymentListAPIView, UserCreateAPIView, UserListAPIView, \
-    UserProfileRetrieveAPIView, UserProfileDestroyAPIView
+from users.views import (
+    UserProfileUpdateAPIView,
+    PaymentListAPIView,
+    UserCreateAPIView,
+    UserListAPIView,
+    UserProfileRetrieveAPIView,
+    UserProfileDestroyAPIView,
+)
 from rest_framework_simplejwt.views import (
     TokenObtainPairView,
     TokenRefreshView,
@@ -18,7 +24,9 @@ urlpatterns = [
     path(
         "user/<int:pk>/update", UserProfileUpdateAPIView.as_view(), name="user_update"
     ),
-    path("user/<int:pk>/delete", UserProfileDestroyAPIView.as_view(), name="user_destroy"),
+    path(
+        "user/<int:pk>/delete", UserProfileDestroyAPIView.as_view(), name="user_destroy"
+    ),
     path("payment/", PaymentListAPIView.as_view(), name="payment_list"),
     path(
         "login/",
