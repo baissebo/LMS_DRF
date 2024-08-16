@@ -1,3 +1,4 @@
+from rest_framework import serializers
 from rest_framework.fields import SerializerMethodField
 from rest_framework.serializers import ModelSerializer
 
@@ -21,6 +22,7 @@ class UserSerializer(ModelSerializer):
 class UserProfileSerializer(ModelSerializer):
     payments = PaymentSerializer(many=True, read_only=True, source="user_payments")
     subscriptions = SerializerMethodField()
+    password = serializers.CharField(write_only=True)
 
     def get_subscriptions(self, obj):
         subscriptions = Subscription.objects.filter(user=obj)
@@ -38,4 +40,5 @@ class UserProfileSerializer(ModelSerializer):
             "date_joined",
             "last_name",
             "subscriptions",
+            "password",
         )

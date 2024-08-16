@@ -10,6 +10,7 @@ from rest_framework.generics import (
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
+from materials.paginations import CustomPagination
 from users.models import User, Payment
 from users.permissions import IsOwner
 from users.serializers import UserSerializer, PaymentSerializer, UserProfileSerializer
@@ -29,17 +30,21 @@ class UserCreateAPIView(CreateAPIView):
 class UserListAPIView(ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    pagination_class = CustomPagination
 
     def list(self, request, *args, **kwargs):
-        queryset = self.get_queryset()
-        user_data = []
+        queryset = self.filter_queryset(self.get_queryset())
+        page = self.paginate_queryset(queryset)
+        if page is not None:
+            serializer = self.get_serializer(page, many=True)
+            return self.get_paginated_response(serializer.data)
 
-        for user in queryset:
-            if user == request.user:
-                user_data.append(UserProfileSerializer(user).data)
-            else:
-                user_data.append(UserSerializer(user).data)
-
+        user_data = [
+            UserProfileSerializer(user).data
+            if user == request.user
+            else UserSerializer(user).data
+            for user in queryset
+        ]
         return Response(user_data)
 
 
