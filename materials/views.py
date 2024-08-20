@@ -1,4 +1,7 @@
+from datetime import timedelta
+
 from django.shortcuts import get_object_or_404
+from django.utils import timezone
 from django.utils.decorators import method_decorator
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import (
@@ -13,6 +16,7 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.viewsets import ModelViewSet
 
+from materials.tasks import send_update_course_email
 from materials.models import Course, Lesson, Subscription
 from materials.paginations import CustomPagination
 from materials.serializers import (
@@ -39,6 +43,18 @@ class CourseViewSet(ModelViewSet):
 
     def perform_create(self, serializer):
         serializer.save(owner=self.request.user)
+
+    def perform_update(self, serializer):
+        course = self.get_object()
+        last_course_update = course.last_update
+
+        course.last_update = timezone.now()
+        course.save()
+
+        serializer.save()
+
+        if last_course_update < timezone.now() - timedelta(hours=4):
+            send_update_course_email.delay(course.pk)
 
     def get_permissions(self):
         if self.action == "create":
@@ -91,6 +107,19 @@ class LessonUpdateAPIView(UpdateAPIView):
     queryset = Lesson.objects.all()
     serializer_class = LessonSerializer
     permission_classes = (IsAuthenticated, IsModer | IsOwner)
+
+    def perform_update(self, serializer):
+        lesson = self.get_object()
+        last_lesson_update = lesson.updated_at
+
+        serializer.save()
+
+        course = lesson.course
+        course.last_update = timezone.now()
+        course.save()
+
+        if last_lesson_update < timezone.now() - timedelta(hours=4):
+            send_update_course_email.delay(course.pk)
 
 
 class LessonDestroyAPIView(DestroyAPIView):
