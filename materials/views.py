@@ -2,8 +2,6 @@ from datetime import timedelta
 
 from django.shortcuts import get_object_or_404
 from django.utils import timezone
-from django.utils.decorators import method_decorator
-from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import (
     CreateAPIView,
     DestroyAPIView,
@@ -25,6 +23,7 @@ from materials.serializers import (
     LessonSerializer,
 )
 from users.permissions import IsModer, IsOwner
+from users.services import create_stripe_product
 
 
 class CourseViewSet(ModelViewSet):
@@ -42,7 +41,8 @@ class CourseViewSet(ModelViewSet):
         return CourseSerializer
 
     def perform_create(self, serializer):
-        serializer.save(owner=self.request.user)
+        course = serializer.save(owner=self.request.user)
+        create_stripe_product(course)
 
     def perform_update(self, serializer):
         course = self.get_object()
@@ -52,6 +52,7 @@ class CourseViewSet(ModelViewSet):
         course.save()
 
         serializer.save()
+        create_stripe_product(course)
 
         if last_course_update < timezone.now() - timedelta(hours=4):
             send_update_course_email.delay(course.pk)

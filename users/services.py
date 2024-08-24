@@ -4,6 +4,16 @@ from config.settings import STRIPE_API_KEY
 stripe.api_key = STRIPE_API_KEY
 
 
+def create_stripe_product(course):
+    product = stripe.Product.create(
+        name=course.name,
+        description=course.description,
+        images=[course.preview.url],
+        metadata={"course_id": course.id},
+    )
+    return product
+
+
 def create_stripe_price(amount):
     return stripe.Price.create(
         currency="rub",
