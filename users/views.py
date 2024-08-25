@@ -14,7 +14,7 @@ from materials.paginations import CustomPagination
 from users.models import User, Payment
 from users.permissions import IsOwner
 from users.serializers import UserSerializer, PaymentSerializer, UserProfileSerializer
-from users.services import create_stripe_price, create_stripe_session
+from users.services import create_stripe_price, create_stripe_session, create_stripe_product
 
 
 class UserCreateAPIView(CreateAPIView):
@@ -90,7 +90,8 @@ class PaymentCreateAPIView(CreateAPIView):
 
     def perform_create(self, serializer):
         payment = serializer.save(user=self.request.user)
-        price = create_stripe_price(payment.amount)
+        product = create_stripe_product(payment.course)
+        price = create_stripe_price(payment.amount, product)
         session_id, payment_link = create_stripe_session(price)
         payment.session_id = session_id
         payment.link = payment_link

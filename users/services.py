@@ -8,17 +8,15 @@ def create_stripe_product(course):
     product = stripe.Product.create(
         name=course.name,
         description=course.description,
-        images=[course.preview.url],
-        metadata={"course_id": course.id},
     )
     return product
 
 
-def create_stripe_price(amount):
+def create_stripe_price(amount, product):
     return stripe.Price.create(
         currency="rub",
         unit_amount=int(amount * 100),
-        product_data={"name": "Payment course"},
+        product=product.id,
     )
 
 
