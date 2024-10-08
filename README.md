@@ -19,3 +19,6 @@
 - PostgreSQL
 - JWT-аутентификация
 
+#### **Для запуска файла в Docker:**
+
+Ввести команду в терминал: <docker-compose up -d --build>
